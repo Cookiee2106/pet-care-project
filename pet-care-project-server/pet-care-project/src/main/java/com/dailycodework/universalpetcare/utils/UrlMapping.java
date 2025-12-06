@@ -99,5 +99,6 @@ public class UrlMapping {
     public static final String DELETE_TOKEN = "/delete-token";
     public static final String VERIFY_EMAIL = "/verify-your-email";
     public static final String RESEND_VERIFICATION_TOKEN = "/resend-verification-token" ;
+    public static final String RESEND_VERIFICATION_EMAIL = "/resend-verification-email" ;
     /*============================ End verification token ===================================*/
 }

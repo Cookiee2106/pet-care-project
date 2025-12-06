@@ -12,4 +12,6 @@ public interface IVerificationTokenService {
     Optional<VerificationToken> findByToken(String token);
     void deleteVerificationToken(Long tokenId);
     boolean isTokenExpired(String token);
+    User findUserByEmail(String email);
+    VerificationToken findTokenByUser(User user);
 }

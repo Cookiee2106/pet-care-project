@@ -81,4 +81,15 @@ public class VerificationTokenService implements IVerificationTokenService {
         VerificationToken verificationToken = theToken.get();
         return verificationToken.getExpirationDate().getTime() <= Calendar.getInstance().getTime().getTime();
     }
+
+    @Override
+    public User findUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new com.dailycodework.universalpetcare.exception.ResourceNotFoundException("Không tìm thấy người dùng với email: " + email));
+    }
+
+    @Override
+    public VerificationToken findTokenByUser(User user) {
+        return tokenRepository.findByUserId(user.getId()).orElse(null);
+    }
 }

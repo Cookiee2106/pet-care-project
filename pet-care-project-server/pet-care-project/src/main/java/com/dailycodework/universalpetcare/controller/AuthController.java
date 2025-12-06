@@ -93,6 +93,32 @@ public class AuthController {
         }
     }
 
+    @PostMapping(UrlMapping.RESEND_VERIFICATION_EMAIL)
+    public ResponseEntity<ApiResponse> resendVerificationEmail(@RequestBody Map<String, String> requestBody) {
+        String email = requestBody.get("email");
+        if (email == null || email.trim().isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(new ApiResponse(FeedBackMessage.INVALID_EMAIL, null));
+        }
+        try {
+            User theUser = tokenService.findUserByEmail(email);
+            if (theUser.isEnabled()) {
+                return ResponseEntity.badRequest()
+                        .body(new ApiResponse("Tài khoản đã được kích hoạt", null));
+            }
+            VerificationToken existingToken = tokenService.findTokenByUser(theUser);
+            if (existingToken != null) {
+                tokenService.deleteVerificationToken(existingToken.getId());
+            }
+            publisher.publishEvent(new RegistrationCompleteEvent(theUser));
+            return ResponseEntity.ok(new ApiResponse(FeedBackMessage.NEW_VERIFICATION_TOKEN_SENT, null));
+        } catch (ResourceNotFoundException ex) {
+            return ResponseEntity.badRequest().body(new ApiResponse(ex.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(new ApiResponse(e.getMessage(), null));
+        }
+    }
+
     @PostMapping(UrlMapping.REQUEST_PASSWORD_RESET)
     public ResponseEntity<ApiResponse> requestPasswordReset(@RequestBody Map<String, String> requestBody){
         String email = requestBody.get("email");
