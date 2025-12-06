@@ -13,7 +13,7 @@ public class UserAttributesMapper {
         target.setPhoneNumber(source.getPhoneNumber());
         target.setEmail(source.getEmail());
         target.setPassword(source.getPassword());
-        target.setEnabled(true); // Auto-enable users since email verification is not working on free tier
+        target.setEnabled(source.isEnabled());
         target.setUserType(source.getUserType());
     }
 }
