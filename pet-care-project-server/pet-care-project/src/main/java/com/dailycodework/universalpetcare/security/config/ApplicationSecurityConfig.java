@@ -80,10 +80,11 @@ public class ApplicationSecurityConfig {
             @Override
             public void addCorsMappings(@NonNull CorsRegistry registry) {
                 registry.addMapping("/**") // Apply to all endpoints
-                        .allowedOrigins("http://localhost:5174", frontendUrl) // Allow local and production
+                        .allowedOriginPatterns("http://localhost:*", "https://*.vercel.app") // Allow all Vercel deployments
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Allow these HTTP methods
                         .allowedHeaders("*") // Allow all headers
-                        .allowCredentials(true); // Allow credentials
+                        .allowCredentials(true) // Allow credentials
+                        .maxAge(3600); // Cache preflight for 1 hour
             }
         };
     }
