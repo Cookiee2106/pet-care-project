@@ -5,7 +5,6 @@ import com.dailycodework.universalpetcare.event.*;
 import com.dailycodework.universalpetcare.model.Appointment;
 import com.dailycodework.universalpetcare.model.User;
 import com.dailycodework.universalpetcare.service.token.IVerificationTokenService;
-import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,7 +13,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
 @Slf4j
@@ -82,14 +80,10 @@ public class NotificationEventListener implements ApplicationListener<Applicatio
         tokenService.saveVerificationTokenForUser(vToken, user);
         // Build the verification url
         String verificationUrl = frontendBaseUrl + "/email-verification?token=" + vToken;
-        try {
-            sendRegistrationVerificationEmail(user, verificationUrl);
-        } catch (MessagingException | UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
+        sendRegistrationVerificationEmail(user, verificationUrl);
     }
 
-    private void sendRegistrationVerificationEmail(User user, String url) throws MessagingException, UnsupportedEncodingException {
+    private void sendRegistrationVerificationEmail(User user, String url) {
         String subject = "Xác thực email";
         String senderName = "Pet Care";
         String mailContent = "<p> Hi, " + user.getFirstName() + ", </p>" +
@@ -105,13 +99,13 @@ public class NotificationEventListener implements ApplicationListener<Applicatio
 
     /*======================== Start New Appointment booked notifications ===================================================*/
 
-    private void handleAppointmentBookedNotification(AppointmentBookedEvent event) throws MessagingException, UnsupportedEncodingException {
+    private void handleAppointmentBookedNotification(AppointmentBookedEvent event) {
         Appointment appointment = event.getAppointment();
         User vet = appointment.getVeterinarian();
         sendAppointmentBookedNotification(vet, frontendBaseUrl);
     }
 
-    private void sendAppointmentBookedNotification(User user, String url) throws MessagingException, UnsupportedEncodingException {
+    private void sendAppointmentBookedNotification(User user, String url) {
         String subject = "Thông báo lịch hẹn mới";
         String senderName = "Pet Care";
         String mailContent = "<p>Chào bạn, " + user.getFirstName() + ", </p>" +
@@ -125,13 +119,13 @@ public class NotificationEventListener implements ApplicationListener<Applicatio
 
     /*======================== Start Approve Appointment notifications ===================================================*/
 
-    private void handleAppointmentApprovedNotification(AppointmentApprovedEvent event) throws MessagingException, UnsupportedEncodingException {
+    private void handleAppointmentApprovedNotification(AppointmentApprovedEvent event) {
         Appointment appointment = event.getAppointment();
         User patient = appointment.getPatient();
         sendAppointmentApprovedNotification(patient, frontendBaseUrl);
     }
 
-    private void sendAppointmentApprovedNotification(User user, String url) throws MessagingException, UnsupportedEncodingException {
+    private void sendAppointmentApprovedNotification(User user, String url) {
         String subject = "Lịch hẹn đã được duyệt";
         String senderName = "Pet Care";
         String mailContent = "<p> Hi, " + user.getFirstName() + ", </p>" +
@@ -146,13 +140,13 @@ public class NotificationEventListener implements ApplicationListener<Applicatio
 
     /*======================== Start Decline Appointment notifications ===================================================*/
 
-    private void handleAppointmentDeclinedNotification(AppointmentDeclinedEvent event) throws MessagingException, UnsupportedEncodingException {
+    private void handleAppointmentDeclinedNotification(AppointmentDeclinedEvent event) {
         Appointment appointment = event.getAppointment();
         User patient = appointment.getPatient();
         sendAppointmentDeclinedNotification(patient, frontendBaseUrl);
     }
 
-    private void sendAppointmentDeclinedNotification(User user, String url) throws MessagingException, UnsupportedEncodingException {
+    private void sendAppointmentDeclinedNotification(User user, String url) {
         String subject = "Lịch hẹn đã bị từ chối";
         String senderName = "Pet care";
         String mailContent = "<p> Chào bạn, " + user.getFirstName() + ", </p>" +
@@ -173,14 +167,10 @@ public class NotificationEventListener implements ApplicationListener<Applicatio
         String token = UUID.randomUUID().toString();
         tokenService.saveVerificationTokenForUser(token, user);
         String resetUrl = frontendBaseUrl + "/reset-password?token=" + token;
-        try {
-            sendPasswordResetEmail(user, resetUrl);
-        } catch (MessagingException | UnsupportedEncodingException e) {
-            throw new RuntimeException("Không thể gửi email đặt lại mật khẩu", e);
-        }
+        sendPasswordResetEmail(user, resetUrl);
     }
 
-    private void sendPasswordResetEmail(User user, String resetUrl) throws MessagingException, UnsupportedEncodingException {
+    private void sendPasswordResetEmail(User user, String resetUrl) {
         String subject = "Yêu cầu đặt lại mật khẩu";
         String senderName = "Universal Pet Care";
         String mailContent = "<p>Chào bạn, " + user.getFirstName() + ",</p>" +
