@@ -39,7 +39,7 @@ public class UserController {
     public ResponseEntity<ApiResponse> register(@RequestBody RegistrationRequest request) {
         try {
             User theUser = userService.register(request);
-            publisher.publishEvent(new RegistrationCompleteEvent(theUser));
+//             publisher.publishEvent(new RegistrationCompleteEvent(theUser));
             UserDto registeredUser = entityConverter.mapEntityToDto(theUser, UserDto.class);
             return ResponseEntity.ok(new ApiResponse(FeedBackMessage.CREATE_USER_SUCCESS, registeredUser));
         } catch (AlreadyExistsException e) {

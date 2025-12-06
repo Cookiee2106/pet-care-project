@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Table, OverlayTrigger, Tooltip, Row, Col } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { BsEyeFill } from "react-icons/bs";
+import { BsEyeFill, BsLockFill, BsTrashFill, BsUnlockFill } from "react-icons/bs";
 import AlertMessage from "../common/AlertMessage";
 import UseMessageAlerts from "../hooks/UseMessageAlerts";
+import DeleteConfirmationModal from "../modals/DeleteConfirmationModal";
 import { getPatients } from "../patient/PatientService";
+import { deleteUser, lockUserAccount, unLockUserAccount } from "../user/UserService";
 import UserFilter from "../user/UserFilter";
 import Paginator from "../common/Paginator";
 import NoDataAvailable from "../common/NoDataAvailable";
@@ -15,6 +17,8 @@ const PatientComponent = () => {
   const [selectedEmail, setSelectedEmail] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [patientsPerPage] = useState(10);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [patientToDelete, setPatientToDelete] = useState(null);
 
   // start pagination
   const indexOfLastPatient = currentPage * patientsPerPage;
@@ -64,10 +68,65 @@ const PatientComponent = () => {
     setSelectedEmail("");
   };
 
+  const handleDeleteAccount = async () => {
+    if (patientToDelete) {
+      try {
+        const response = await deleteUser(patientToDelete);
+        setSuccessMessage(response.message);
+        setShowDeleteModal(false);
+        setShowSuccessAlert(true);
+        fetchPatients();
+      } catch (error) {
+        setErrorMessage(error.message);
+        setShowErrorAlert(true);
+      }
+    }
+  };
+
+  const handleShowDeleteModal = (patientId) => {
+    setPatientToDelete(patientId);
+    setShowDeleteModal(true);
+  };
+
+  // Function to toggle lock/unlock user account
+  const handleToggleAccountLock = async (patient) => {
+    try {
+      let response;
+      if (patient.enabled) {
+        response = await lockUserAccount(patient.id);
+      } else {
+        response = await unLockUserAccount(patient.id);
+      }
+      // Optimistically update the UI to reflect the new 'enabled' state
+      setPatients(
+        patients.map((thePatient) =>
+          thePatient.id === patient.id
+            ? { ...thePatient, enabled: !thePatient.enabled }
+            : thePatient
+        )
+      );
+      setSuccessMessage(response.message);
+      setShowErrorAlert(false);
+      setShowSuccessAlert(true);
+    } catch (error) {
+      console.error("Error : ", error);
+      setErrorMessage(error.response.data.message);
+      setShowSuccessAlert(false);
+      setShowErrorAlert(true);
+    }
+  };
+
   return (
     <main>
       {currentPatients && currentPatients.length > 0 ? (
         <React.Fragment>
+          <DeleteConfirmationModal
+            show={showDeleteModal}
+            onHide={() => setShowDeleteModal(false)}
+            onConfirm={handleDeleteAccount}
+            itemToDelete='patient'
+          />
+
           <Row>
             <h5>Danh sách chủ thú cưng</h5>
             <Col>
@@ -100,7 +159,7 @@ const PatientComponent = () => {
                 <th>Số điện thoại</th>
                 <th>Giới tính</th>
                 <th>Ngày đăng ký</th>
-                <th colSpan={2}>Thao tác</th>
+                <th colSpan={3}>Thao tác</th>
               </tr>
             </thead>
 
@@ -125,6 +184,37 @@ const PatientComponent = () => {
                         to={`/user-dashboard/${patient.id}/my-dashboard`}
                         className='text-info'>
                         <BsEyeFill />
+                      </Link>
+                    </OverlayTrigger>
+                  </td>
+
+                  <td>
+                    <OverlayTrigger
+                      overlay={
+                        <Tooltip id={`tooltip-lock-${index}`}>
+                          {patient.enabled ? "Khóa" : "Unlock"} tài khoản
+                        </Tooltip>
+                      }>
+                      <span
+                        onClick={() => handleToggleAccountLock(patient)}
+                        style={{ cursor: "pointer" }}>
+                        {patient.enabled ? <BsUnlockFill /> : <BsLockFill />}
+                      </span>
+                    </OverlayTrigger>
+                  </td>
+
+                  <td>
+                    <OverlayTrigger
+                      overlay={
+                        <Tooltip id={`tooltip-delete-${index}`}>
+                          xóa tài khoản
+                        </Tooltip>
+                      }>
+                      <Link
+                        to={"#"}
+                        className='text-danger'
+                        onClick={() => handleShowDeleteModal(patient.id)}>
+                        <BsTrashFill />
                       </Link>
                     </OverlayTrigger>
                   </td>
