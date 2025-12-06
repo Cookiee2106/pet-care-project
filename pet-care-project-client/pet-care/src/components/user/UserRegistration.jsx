@@ -19,6 +19,7 @@ const UserRegistration = () => {
     password: "",
     userType: "",
     specialization: "",
+    isEnabled: false,
   });
   const {
     successMessage,
@@ -66,6 +67,7 @@ const UserRegistration = () => {
       password: "",
       userType: "",
       specialization: "",
+      isEnabled: false,
     });
   };
 
