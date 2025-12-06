@@ -1,5 +1,6 @@
 package com.dailycodework.universalpetcare.email;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -11,7 +12,10 @@ import java.util.Map;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class EmailService {
+
+    private final RestTemplate restTemplate;
 
     @Value("${resend.api.key:}")
     private String resendApiKey;
@@ -19,7 +23,6 @@ public class EmailService {
     @Value("${resend.from.email:onboarding@resend.dev}")
     private String fromEmail;
 
-    private final RestTemplate restTemplate = new RestTemplate();
     private static final String RESEND_API_URL = "https://api.resend.com/emails";
 
     public void sendEmail(String to, String subject, String senderName, String mailContent) {
