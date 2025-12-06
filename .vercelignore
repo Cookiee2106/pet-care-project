@@ -1,0 +1,8 @@
+pet-care-project-server/
+*.java
+*.class
+*.jar
+target/
+mvnw
+mvnw.cmd
+pom.xml
