@@ -25,7 +25,7 @@ export async function bookAppointment(
 export const updateAppointment = async (appointmentId, appointmentData) => {
   try {
     const response = await api.put(
-      `appointments/appointment/${appointmentId}/update`,
+      `/appointments/appointment/${appointmentId}/update`,
       appointmentData
     );
     console.log("Two :", response.data.message);
