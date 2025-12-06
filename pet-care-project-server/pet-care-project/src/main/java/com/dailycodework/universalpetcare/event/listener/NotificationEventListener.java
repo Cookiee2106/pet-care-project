@@ -7,14 +7,17 @@ import com.dailycodework.universalpetcare.model.User;
 import com.dailycodework.universalpetcare.service.token.IVerificationTokenService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class NotificationEventListener implements ApplicationListener<ApplicationEvent> {
@@ -25,54 +28,47 @@ public class NotificationEventListener implements ApplicationListener<Applicatio
     private String frontendBaseUrl;
 
     @Override
+    @Async
     public void onApplicationEvent(ApplicationEvent event) {
         Object source = event.getSource();
-        switch (event.getClass().getSimpleName()) {
+        try {
+            switch (event.getClass().getSimpleName()) {
 
-            case "RegistrationCompleteEvent":
-                if (source instanceof User) {
-                    handleSendRegistrationVerificationEmail((RegistrationCompleteEvent) event);
-                }
-                break;
+                case "RegistrationCompleteEvent":
+                    if (source instanceof User) {
+                        handleSendRegistrationVerificationEmail((RegistrationCompleteEvent) event);
+                    }
+                    break;
 
-            case "AppointmentBookedEvent":
-                if (source instanceof Appointment) {
-                    try {
+                case "AppointmentBookedEvent":
+                    if (source instanceof Appointment) {
                         handleAppointmentBookedNotification((AppointmentBookedEvent) event);
-                    } catch (MessagingException | UnsupportedEncodingException e) {
-                        throw new RuntimeException(e);
                     }
-                }
-                break;
+                    break;
 
-            case "AppointmentApprovedEvent":
-                if (source instanceof Appointment) {
-                    try {
+                case "AppointmentApprovedEvent":
+                    if (source instanceof Appointment) {
                         handleAppointmentApprovedNotification((AppointmentApprovedEvent) event);
-                    } catch (MessagingException | UnsupportedEncodingException e) {
-                        throw new RuntimeException(e);
                     }
-                }
-                break;
+                    break;
 
-            case "AppointmentDeclinedEvent":
-                if (source instanceof Appointment) {
-                    try {
+                case "AppointmentDeclinedEvent":
+                    if (source instanceof Appointment) {
                         handleAppointmentDeclinedNotification((AppointmentDeclinedEvent) event);
-                    } catch (MessagingException | UnsupportedEncodingException e) {
-                        throw new RuntimeException(e);
                     }
-                }
-                break;
+                    break;
 
-            case "PasswordResetEvent":
-                PasswordResetEvent passwordResetEvent = (PasswordResetEvent) event;
-                handlePasswordResetRequest(passwordResetEvent);
-                break;
+                case "PasswordResetEvent":
+                    PasswordResetEvent passwordResetEvent = (PasswordResetEvent) event;
+                    handlePasswordResetRequest(passwordResetEvent);
+                    break;
 
-
-            default:
-                break;
+                default:
+                    break;
+            }
+        } catch (Exception e) {
+            log.error("Failed to send email notification: {}", e.getMessage());
+            // Don't throw exception - email failure should not crash the request
         }
     }
 
